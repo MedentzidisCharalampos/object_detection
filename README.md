@@ -9,6 +9,8 @@ A modular platform built with **FastAPI** + **Streamlit** to perform:
 
 ---
 
+
+![frontend_layout](frontend_layout.png)
 ## 🛠️ Setup
 
 ```bash
