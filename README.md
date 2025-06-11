@@ -1,5 +1,4 @@
-# YOLO Segmentation and Detection Platform
-
+# YOLO Detection, Segmentation & Pose Estimation Platform
 ## 🧩 Overview
 A modular platform built with **FastAPI** + **Streamlit** to perform:
 - Object Detection (YOLOv8)
