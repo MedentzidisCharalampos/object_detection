@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install system dependencies
         run: |
@@ -42,15 +42,14 @@ jobs:
           curl -L -o yolov5s.pt https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov5s.pt
           curl -L -o yolov8n-seg.pt https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n-seg.pt
           curl -L -o yolov8n-pose.pt https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n-pose.pt
-          cd ..
-          python -c "import torch, torchvision.models as models; torch.save(models.resnet18(pretrained=True), 'models/resnet18.pt')"
+          python -c "import torch, torchvision.models as models; torch.save(models.resnet18(pretrained=True), 'resnet18.pt')"
 
       - name: Lint with flake8
         run: |
           pip install flake8
           flake8 backend/ --count --show-source --statistics
 
-      - name: Run FastAPI server check (dry test)
+      - name: Run FastAPI server health check
         run: |
           uvicorn backend.main:app --host 0.0.0.0 --port 8000 &
           sleep 10
@@ -59,3 +58,4 @@ jobs:
       - name: Run unit tests (optional)
         run: |
           pytest tests/ || echo "No tests yet"
+        continue-on-error: true
