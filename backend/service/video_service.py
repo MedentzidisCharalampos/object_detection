@@ -8,7 +8,7 @@ from backend.models.segmentor import Segmentor
 from backend.models.pose_estimator import PoseEstimator
 
 
-def process_video_detect(video_path, output_dir, model_path="models/yolov5s.pt"):
+def process_video_detect(video_path, output_dir, model_path="models/yolov8n.pt"):
     detector = Detector(model_path)
 
     def detect_fn(frame):

@@ -36,7 +36,6 @@ with tab1:
                     result = response.json()
                     st.success("✅ Task Complete")
                     st.image(result["result_path"], caption="Result Image")
-                    st.write("**Detected Classes:**", result["class_names"])
                 else:
                     st.error(f"❌ Server error: {response.status_code}")
                     st.code(response.text)
@@ -96,39 +95,39 @@ with tab3:
         st.error("Database not available or not populated yet.")
         st.code(str(e))
 
-# ---- Tab 4: Upload Video ----
-with tab4:
-    st.subheader("Upload a Video")
-    task_type = st.selectbox("Select Task", ["Object Detection", "Segmentation", "Pose Estimation"], key="video_task")
-    video_file = st.file_uploader("Choose a video file (MP4/AVI)", type=["mp4", "avi", "mov"])
+# # ---- Tab 4: Upload Video ----
+# with tab4:
+#     st.subheader("Upload a Video")
+#     task_type = st.selectbox("Select Task", ["Object Detection", "Segmentation", "Pose Estimation"], key="video_task")
+#     video_file = st.file_uploader("Choose a video file (MP4/AVI)", type=["mp4", "avi", "mov"])
 
-    if video_file:
-        with st.spinner("Uploading and processing video..."):
-            try:
-                files = {"file": (video_file.name, video_file.read(), video_file.type)}
-                response = requests.post(get_endpoint(task_type, is_video=True), files=files)
+#     if video_file:
+#         with st.spinner("Uploading and processing video..."):
+#             try:
+#                 files = {"file": (video_file.name, video_file.read(), video_file.type)}
+#                 response = requests.post(get_endpoint(task_type, is_video=True), files=files)
 
-                if response.ok:
-                    result = response.json()
-                    st.success("✅ Video processed.")
-                    st.write(f"Frames processed: {result.get('frame_count', '?')}")
+#                 if response.ok:
+#                     result = response.json()
+#                     st.success("✅ Video processed.")
+#                     st.write(f"Frames processed: {result.get('frame_count', '?')}")
 
-                    video_path = result.get("video_path")
-                    frame_paths = result.get("frame_paths", [])
+#                     video_path = result.get("video_path")
+#                     frame_paths = result.get("frame_paths", [])
 
-                    if video_path and os.path.exists(video_path):
-                        with open(video_path, 'rb') as f:
-                            st.video(f.read())
-                    elif frame_paths:
-                        st.write("Displaying processed frames:")
-                        for path in frame_paths:
-                            if os.path.exists(path):
-                                st.image(path, use_column_width=True)
-                    else:
-                        st.warning("⚠️ No video or frames available.")
-                else:
-                    st.error("❌ Server returned error.")
-                    st.code(response.text)
-            except Exception as e:
-                st.error("❌ Failed to upload or process video.")
-                st.code(str(e))
+#                     if video_path and os.path.exists(video_path):
+#                         with open(video_path, 'rb') as f:
+#                             st.video(f.read())
+#                     elif frame_paths:
+#                         st.write("Displaying processed frames:")
+#                         for path in frame_paths:
+#                             if os.path.exists(path):
+#                                 st.image(path, use_column_width=True)
+#                     else:
+#                         st.warning("⚠️ No video or frames available.")
+#                 else:
+#                     st.error("❌ Server returned error.")
+#                     st.code(response.text)
+#             except Exception as e:
+#                 st.error("❌ Failed to upload or process video.")
+#                 st.code(str(e))

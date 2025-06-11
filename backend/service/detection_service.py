@@ -6,8 +6,7 @@ from backend.models.detector import Detector
 from backend.models.segmentor import Segmentor
 from backend.models.pose_estimator import PoseEstimator
 
-
-def detect_from_video(video_path, output_dir, model_path="models/yolov5s.pt"):
+def detect_from_video(video_path, output_dir, model_path="models/yolov8n.pt"):
     """
     Run YOLO object detection on each frame of the input video.
     """
@@ -42,7 +41,7 @@ def handle_image(image_bytes: bytes, task: str):
 
     # Select the appropriate model
     if task == "detect":
-        model = Detector("models/yolov5s.pt")
+        model = Detector("models/yolov8n.pt")
     elif task == "segment":
         model = Segmentor("models/yolov8n-seg.pt")
     elif task == "pose":
