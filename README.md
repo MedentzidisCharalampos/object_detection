@@ -2,10 +2,10 @@
 
 ## 🧩 Overview
 A modular platform built with **FastAPI** + **Streamlit** to perform:
-- Object Detection (YOLOv5)
+- Object Detection (YOLOv8)
 - Instance Segmentation (YOLOv8-seg)
 - Pose Estimation (YOLOv8-pose)
-- Video Frame Inference (Detection / Segmentation / Classification / Pose)
+- Video Frame Inference (Detection / Segmentation / Pose)
 
 ---
 
