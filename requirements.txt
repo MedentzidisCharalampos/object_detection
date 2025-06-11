@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+streamlit
+requests
+sqlalchemy
+#psycopg2-binary
+ultralytics
+python-multipart
+pillow
+pytest
+opencv-python
