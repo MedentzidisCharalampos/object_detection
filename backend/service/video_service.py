@@ -32,8 +32,7 @@ def process_video_pose(video_path, output_dir, model_path="models/yolov8n-pose.p
     estimator = PoseEstimator(model_path)
 
     def estimate_fn(frame):
-        _, buffer = cv2.imencode(".jpg", frame)
-        pose_img = estimator.estimate_pose(buffer.tobytes())
+        pose_img, _ = estimator.estimate_pose(frame)
         return pose_img, None
 
     return _process_video(video_path, output_dir, estimate_fn, suffix="pose")
