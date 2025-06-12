@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import cv2
 
 class Detector:
     def __init__(self, model_path: str):
@@ -14,6 +15,29 @@ class Detector:
         results = self.model(input_path)
         result = results[0]
         result.save(filename=output_path)
+
+        boxes = result.boxes.xyxy.tolist()
+        class_ids = result.boxes.cls.tolist()
+        confidences = result.boxes.conf.tolist()
+        class_names = [self.model.names[int(c)] for c in class_ids]
+
+        return class_names, confidences, boxes
+
+    def detect_and_save_array(self, img, output_path: str):
+        """
+        Run detection on an image array and save the annotated frame to disk.
+
+        Args:
+            img (np.ndarray): OpenCV image in BGR format
+            output_path (str): Path where the annotated frame will be saved
+
+        Returns:
+            tuple: Lists of class names, confidences, and bounding boxes
+        """
+        results = self.model(img)
+        result = results[0]
+        annotated = result.plot()
+        cv2.imwrite(output_path, annotated)
 
         boxes = result.boxes.xyxy.tolist()
         class_ids = result.boxes.cls.tolist()
