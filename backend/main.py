@@ -57,7 +57,7 @@ async def pose_estimate(file: UploadFile = File(...)):
 @app.post("/video/detect")
 async def video_detect(file: UploadFile = File(...)):
     try:
-        result = await handle_video(file, "detect")  # pass UploadFile
+        result = await handle_video(file, "detect", detector=detector)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -66,7 +66,7 @@ async def video_detect(file: UploadFile = File(...)):
 @app.post("/video/segment")
 async def video_segment(file: UploadFile = File(...)):
     try:
-        result = await handle_video(file, "segment")  # pass UploadFile
+        result = await handle_video(file, "segment", segmentor=segmentor)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -75,7 +75,7 @@ async def video_segment(file: UploadFile = File(...)):
 @app.post("/video/pose")
 async def video_pose(file: UploadFile = File(...)):
     try:
-        result = await handle_video(file, "pose")  # pass UploadFile
+        result = await handle_video(file, "pose", pose_estimator=pose_model)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

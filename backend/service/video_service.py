@@ -8,8 +8,7 @@ from backend.models.segmentor import Segmentor
 from backend.models.pose_estimator import PoseEstimator
 
 
-def process_video_detect(video_path, output_dir, model_path="models/yolov8n.pt"):
-    detector = Detector(model_path)
+def process_video_detect(video_path, output_dir, detector: Detector):
 
     def detect_fn(frame):
         annotated, _ = detector.process(frame)
@@ -18,8 +17,7 @@ def process_video_detect(video_path, output_dir, model_path="models/yolov8n.pt")
     return _process_video(video_path, output_dir, detect_fn, suffix="detect")
 
 
-def process_video_segment(video_path, output_dir, model_path="models/yolov8n-seg.pt"):
-    segmentor = Segmentor(model_path)
+def process_video_segment(video_path, output_dir, segmentor: Segmentor):
 
     def segment_fn(frame):
         annotated, _ = segmentor.segment_and_mask(frame)
@@ -28,8 +26,7 @@ def process_video_segment(video_path, output_dir, model_path="models/yolov8n-seg
     return _process_video(video_path, output_dir, segment_fn, suffix="segment")
 
 
-def process_video_pose(video_path, output_dir, model_path="models/yolov8n-pose.pt"):
-    estimator = PoseEstimator(model_path)
+def process_video_pose(video_path, output_dir, estimator: PoseEstimator):
 
     def estimate_fn(frame):
         _, buffer = cv2.imencode(".jpg", frame)
@@ -80,7 +77,13 @@ def _process_video(video_path, output_dir, processing_fn, suffix="processed", sh
     }
 
 
-async def handle_video(file: UploadFile, task: str):
+async def handle_video(
+    file: UploadFile,
+    task: str,
+    detector: Detector | None = None,
+    segmentor: Segmentor | None = None,
+    pose_estimator: PoseEstimator | None = None,
+):
     suffix = os.path.splitext(file.filename)[-1]
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(await file.read())
@@ -90,11 +93,14 @@ async def handle_video(file: UploadFile, task: str):
     os.makedirs(output_dir, exist_ok=True)
 
     if task == "detect":
-        return process_video_detect(temp_video_path, output_dir)
+        detector = detector or Detector("models/yolov8n.pt")
+        return process_video_detect(temp_video_path, output_dir, detector)
     elif task == "segment":
-        return process_video_segment(temp_video_path, output_dir)
+        segmentor = segmentor or Segmentor("models/yolov8n-seg.pt")
+        return process_video_segment(temp_video_path, output_dir, segmentor)
     elif task == "pose":
-        return process_video_pose(temp_video_path, output_dir)
+        pose_estimator = pose_estimator or PoseEstimator("models/yolov8n-pose.pt")
+        return process_video_pose(temp_video_path, output_dir, pose_estimator)
     else:
         return {
             "status": "error",
