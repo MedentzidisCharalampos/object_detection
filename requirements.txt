@@ -10,3 +10,4 @@ pillow
 pytest
 opencv-python
 seaborn
+httpx
