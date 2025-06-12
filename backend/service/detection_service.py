@@ -29,9 +29,18 @@ def detect_from_video(video_path, output_dir, model_path="models/yolov8n.pt"):
     return f"Processed {frame_idx} frames."
 
 
-def handle_image(image_bytes: bytes, task: str):
+def handle_image(
+    image_bytes: bytes,
+    task: str,
+    *,
+    detector: Detector | None = None,
+    segmentor: Segmentor | None = None,
+    pose_model: PoseEstimator | None = None,
+):
     """
     Handle image processing for detection, segmentation, or pose estimation.
+
+    Providing preloaded model objects avoids reinitializing them on each call.
     """
     # Decode image bytes to OpenCV format
     nparr = np.frombuffer(image_bytes, np.uint8)
@@ -39,13 +48,13 @@ def handle_image(image_bytes: bytes, task: str):
     if img is None:
         raise ValueError("Failed to decode image bytes")
 
-    # Select the appropriate model
+    # Select the appropriate model. If not supplied, instantiate a new one.
     if task == "detect":
-        model = Detector("models/yolov8n.pt")
+        model = detector if detector is not None else Detector("models/yolov8n.pt")
     elif task == "segment":
-        model = Segmentor("models/yolov8n-seg.pt")
+        model = segmentor if segmentor is not None else Segmentor("models/yolov8n-seg.pt")
     elif task == "pose":
-        model = PoseEstimator("models/yolov8n-pose.pt")
+        model = pose_model if pose_model is not None else PoseEstimator("models/yolov8n-pose.pt")
     else:
         raise ValueError(f"Unsupported task: {task}")
 

@@ -29,7 +29,7 @@ def health():
 async def detect(file: UploadFile = File(...)):
     try:
         image_bytes = await file.read()
-        result = handle_image(image_bytes, task="detect")
+        result = handle_image(image_bytes, task="detect", detector=detector)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -38,7 +38,7 @@ async def detect(file: UploadFile = File(...)):
 async def segment(file: UploadFile = File(...)):
     try:
         image_bytes = await file.read()
-        result = handle_image(image_bytes, task="segment")
+        result = handle_image(image_bytes, task="segment", segmentor=segmentor)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -48,7 +48,7 @@ async def segment(file: UploadFile = File(...)):
 async def pose_estimate(file: UploadFile = File(...)):
     try:
         image_bytes = await file.read()
-        result = handle_image(image_bytes, task="pose")
+        result = handle_image(image_bytes, task="pose", pose_model=pose_model)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
