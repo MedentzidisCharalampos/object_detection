@@ -6,29 +6,31 @@ from fastapi import UploadFile
 from backend.models.detector import Detector
 from backend.models.segmentor import Segmentor
 from backend.models.pose_estimator import PoseEstimator
+from backend.db.session import SessionLocal
+from backend.db.models import Detection
 
 
-def process_video_detect(video_path, output_dir, model_path="models/yolov8n.pt"):
+def process_video_detect(video_path, output_dir, model_path="models/yolov8n.pt", orig_filename=None):
     detector = Detector(model_path)
 
     def detect_fn(frame):
         annotated, _ = detector.process(frame)
         return annotated, None
 
-    return _process_video(video_path, output_dir, detect_fn, suffix="detect")
+    return _process_video(video_path, output_dir, detect_fn, suffix="detect", orig_filename=orig_filename)
 
 
-def process_video_segment(video_path, output_dir, model_path="models/yolov8n-seg.pt"):
+def process_video_segment(video_path, output_dir, model_path="models/yolov8n-seg.pt", orig_filename=None):
     segmentor = Segmentor(model_path)
 
     def segment_fn(frame):
         annotated, _ = segmentor.segment_and_mask(frame)
         return annotated, None
 
-    return _process_video(video_path, output_dir, segment_fn, suffix="segment")
+    return _process_video(video_path, output_dir, segment_fn, suffix="segment", orig_filename=orig_filename)
 
 
-def process_video_pose(video_path, output_dir, model_path="models/yolov8n-pose.pt"):
+def process_video_pose(video_path, output_dir, model_path="models/yolov8n-pose.pt", orig_filename=None):
     estimator = PoseEstimator(model_path)
 
     def estimate_fn(frame):
@@ -36,10 +38,10 @@ def process_video_pose(video_path, output_dir, model_path="models/yolov8n-pose.p
         pose_img = estimator.estimate_pose(buffer.tobytes())
         return pose_img, None
 
-    return _process_video(video_path, output_dir, estimate_fn, suffix="pose")
+    return _process_video(video_path, output_dir, estimate_fn, suffix="pose", orig_filename=orig_filename)
 
 
-def _process_video(video_path, output_dir, processing_fn, suffix="processed", show=False):
+def _process_video(video_path, output_dir, processing_fn, suffix="processed", show=False, orig_filename=None):
     cap = cv2.VideoCapture(video_path)
     frame_idx = 0
     os.makedirs(output_dir, exist_ok=True)
@@ -73,6 +75,21 @@ def _process_video(video_path, output_dir, processing_fn, suffix="processed", sh
     if show:
         cv2.destroyAllWindows()
 
+    # Record processed video in database
+    session = SessionLocal()
+    try:
+        detection_entry = Detection(
+            filename=orig_filename or os.path.basename(video_path),
+            class_names=[],
+            confidences=[],
+            bboxes=[],
+            result_path=video_output_path,
+        )
+        session.add(detection_entry)
+        session.commit()
+    finally:
+        session.close()
+
     return {
         "message": f"{suffix.capitalize()} completed for {frame_idx} frames.",
         "frame_count": frame_idx,
@@ -90,11 +107,11 @@ async def handle_video(file: UploadFile, task: str):
     os.makedirs(output_dir, exist_ok=True)
 
     if task == "detect":
-        return process_video_detect(temp_video_path, output_dir)
+        return process_video_detect(temp_video_path, output_dir, orig_filename=file.filename)
     elif task == "segment":
-        return process_video_segment(temp_video_path, output_dir)
+        return process_video_segment(temp_video_path, output_dir, orig_filename=file.filename)
     elif task == "pose":
-        return process_video_pose(temp_video_path, output_dir)
+        return process_video_pose(temp_video_path, output_dir, orig_filename=file.filename)
     else:
         return {
             "status": "error",

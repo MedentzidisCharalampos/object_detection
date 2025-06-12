@@ -2,6 +2,8 @@ import cv2
 import os
 import uuid
 import numpy as np
+from backend.db.session import SessionLocal
+from backend.db.models import Detection
 from backend.models.detector import Detector
 from backend.models.segmentor import Segmentor
 from backend.models.pose_estimator import PoseEstimator
@@ -29,7 +31,7 @@ def detect_from_video(video_path, output_dir, model_path="models/yolov8n.pt"):
     return f"Processed {frame_idx} frames."
 
 
-def handle_image(image_bytes: bytes, task: str):
+def handle_image(image_bytes: bytes, task: str, filename: str = None):
     """
     Handle image processing for detection, segmentation, or pose estimation.
     """
@@ -57,10 +59,33 @@ def handle_image(image_bytes: bytes, task: str):
     output_path = f"results/{uuid.uuid4().hex}.jpg"
     cv2.imwrite(output_path, annotated)
 
-    # Extract class names if available
+    # Extract detection details if available
     class_names = []
-    if hasattr(results[0], "boxes") and hasattr(results[0].boxes, "cls"):
-        class_names = [str(cls_id) for cls_id in results[0].boxes.cls.tolist()]
+    confidences = []
+    bboxes = []
+    if hasattr(results[0], "boxes"):
+        boxes = results[0].boxes
+        if hasattr(boxes, "cls"):
+            class_names = [str(cls_id) for cls_id in boxes.cls.tolist()]
+        if hasattr(boxes, "conf"):
+            confidences = boxes.conf.tolist()
+        if hasattr(boxes, "xyxy"):
+            bboxes = boxes.xyxy.tolist()
+
+    # Store results in database
+    session = SessionLocal()
+    try:
+        detection_entry = Detection(
+            filename=filename,
+            class_names=class_names,
+            confidences=confidences,
+            bboxes=bboxes,
+            result_path=output_path,
+        )
+        session.add(detection_entry)
+        session.commit()
+    finally:
+        session.close()
 
     return {
         "result_path": output_path,
