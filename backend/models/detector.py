@@ -22,6 +22,30 @@ class Detector:
 
         return class_names, confidences, boxes
 
+    def detect_and_save_array(self, img, output_path: str):
+        """
+        Run detection directly on an image array and save the annotated result.
+
+        Args:
+            img (np.ndarray): Input image in BGR format.
+            output_path (str): Where to save the annotated image.
+
+        Returns:
+            tuple: (class_names, confidences, boxes)
+        """
+        # Perform inference on the provided image array
+        results = self.model(img)
+        result = results[0]
+        # Save annotated image to the specified path
+        result.save(filename=output_path)
+
+        boxes = result.boxes.xyxy.tolist()
+        class_ids = result.boxes.cls.tolist()
+        confidences = result.boxes.conf.tolist()
+        class_names = [self.model.names[int(c)] for c in class_ids]
+
+        return class_names, confidences, boxes
+
     def process(self, img):
         """
         Run detection directly on a given OpenCV image and return annotated frame and results.
