@@ -13,12 +13,15 @@ st.title("🧠 YOLO Detection, Segmentation & Pose Estimation")
 tabs = ["📁 Image Upload", "📷 Webcam Detection", "📊 Detection History", "📼 Video Upload"]
 tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+
 def get_endpoint(task_type, is_video=False):
     prefix = "/video" if is_video else ""
-    return f"http://localhost:8000{prefix}/" + {
+    return f"{API_URL}{prefix}/" + {
         "Object Detection": "detect",
         "Segmentation": "segment",
-        "Pose Estimation": "pose"
+        "Pose Estimation": "pose",
     }[task_type]
 
 # ---- Tab 1: Upload Image ----

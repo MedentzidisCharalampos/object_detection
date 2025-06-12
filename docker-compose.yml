@@ -1,0 +1,22 @@
+version: '3'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./detections.db:/app/detections.db
+      - ./models:/app/models
+      - ./results:/app/results
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    volumes:
+      - ./detections.db:/app/detections.db
+      - ./models:/app/models
+      - ./results:/app/results
+    depends_on:
+      - backend
