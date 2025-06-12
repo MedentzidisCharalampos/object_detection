@@ -19,6 +19,13 @@ conda activate vision_models
 pip install -r requirements.txt
 ```
 
+### 🔹 Initialize Database
+Run once to create the SQLite tables:
+
+```bash
+python create_db.py
+```
+
 ---
 
 ## ▶️ Run Services
