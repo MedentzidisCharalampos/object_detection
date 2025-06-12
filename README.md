@@ -53,6 +53,36 @@ Place these files in a `models/` folder or project root:
 
 
 ---
+## Deployment with Nginx
+1. Install Nginx:
+```bash
+sudo apt update && sudo apt install nginx
+```
+
+2. Copy the configuration and generate a self-signed certificate:
+```bash
+sudo cp nginx/fastapi.conf /etc/nginx/conf.d/
+sudo mkdir -p /etc/nginx/ssl
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt
+```
+For production, use Let's Encrypt instead:
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d your-domain
+```
+
+3. Start the application servers:
+```bash
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+streamlit run frontend/app.py --server.port 8501
+```
+
+4. Reload Nginx:
+```bash
+sudo nginx -s reload
+```
+
+Requests to https://<host>/api will reach FastAPI and / will display the Streamlit UI.
 
 
 ## 📜 License
